@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">HSE-Task</string>
+    <string name="title">RickAndMorty API implementation</string>
 </resources>
