@@ -1,4 +1,4 @@
-package me.dion.hse.api
+package me.dion.hse.network
 
 import android.annotation.SuppressLint
 import android.os.Handler
