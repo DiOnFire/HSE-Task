@@ -2,6 +2,7 @@ package me.dion.hse.traits
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import java.io.Serializable
 import java.util.*
 
 data class Character(
@@ -10,7 +11,7 @@ data class Character(
     val species: String,
     val gender: String,
     val status: Status,
-    val image: String) {
+    val image: String) : Serializable {
 
     companion object {
         private fun parseStatus(status: String): Status {

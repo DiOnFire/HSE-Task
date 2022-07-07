@@ -1,40 +1,46 @@
 package me.dion.hse.network
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Intent
 import android.os.Handler
 import android.os.Message
 import com.google.gson.JsonParser
+import me.dion.hse.activity.SearchActivity
 import me.dion.hse.traits.Character
-import me.dion.hse.network.NetThread
-import me.dion.hse.network.SerializableResponse
 import okhttp3.Request
+import java.io.Serializable
 
 @SuppressLint("HandlerLeak")
-class ApiParser {
-    companion object {
-        fun getCharacters(name: String): List<Character> {
-            var characters = mutableListOf<Character>()
+class ApiParser(val activity: Activity) {
+    var characters: MutableList<Character>? = null
 
-            val request = Request.Builder()
-                .url("https://rickandmortyapi.com/api/character/?name=$name")
-                .build()
+    fun getCharacters(name: String) {
+        val request = Request.Builder()
+            .url("https://rickandmortyapi.com/api/character/?name=$name")
+            .build()
 
-            val handler = object : Handler() {
-                override fun handleMessage(msg: Message) {
-                    val bundle = msg.data
-                    val response = bundle.getSerializable("response") as SerializableResponse
-                    if (response.response.isSuccessful) {
-                        val json = response.response.body.string()
-                        val jsonArray = JsonParser.parseString(json).asJsonArray
-                        characters = Character.parseJsonArray(jsonArray)
-                    }
+        val handler = object : Handler() {
+            override fun handleMessage(msg: Message) {
+                val bundle = msg.data
+                val response = bundle.getSerializable("response") as SerializableResponse
+                if (response.response.isSuccessful) {
+                    val json = response.response.body.string()
+                    val jsonObj = JsonParser.parseString(json).asJsonObject
+                    val results = jsonObj.get("results").asJsonArray
+                    characters = Character.parseJsonArray(results)
+
+                    val intent = Intent(activity, SearchActivity::class.java)
+
+                    intent.putExtra("characters", characters as Serializable)
+
+                    activity.startActivity(intent)
                 }
             }
-
-            val thread = NetThread(handler, request)
-            thread.start()
-            thread.join()
-            return characters
         }
+
+        val thread = NetThread(handler, request)
+        thread.start()
+        thread.join(10000)
     }
 }
