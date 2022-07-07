@@ -1,6 +1,7 @@
 <resources>
-    <string name="app_name">HSE-Task</string>
+    <string name="app_name">RickAndMorty API</string>
     <string name="title">RickAndMorty API implementation</string>
     <string name="enter_name_of_character">Enter name of character</string>
     <string name="search">Search</string>
+    <string name="character_image">Character image</string>
 </resources>

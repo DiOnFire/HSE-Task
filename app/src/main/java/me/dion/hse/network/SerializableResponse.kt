@@ -1,4 +1,4 @@
-package me.dion.hse.traits
+package me.dion.hse.network
 
 import okhttp3.Response
 import java.io.Serializable

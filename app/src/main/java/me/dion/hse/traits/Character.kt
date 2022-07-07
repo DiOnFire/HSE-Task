@@ -1,5 +1,6 @@
 package me.dion.hse.traits
 
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import java.util.*
 
@@ -21,7 +22,7 @@ data class Character(
             }
         }
 
-        fun parseFromJson(json: JsonObject): Character {
+        private fun parseFromJson(json: JsonObject): Character {
             return Character(
                     id = json.get("id").asInt,
                     name = json.get("name").asString,
@@ -29,6 +30,14 @@ data class Character(
                     gender = json.get("gender").asString,
                     status = parseStatus(json.get("status").asString),
                     image = json.get("image").asString)
+        }
+
+        fun parseJsonArray(json: JsonArray): MutableList<Character> {
+            val characters = mutableListOf<Character>()
+            for (i in 0 until json.size()) {
+                characters.add(parseFromJson(json.get(i).asJsonObject))
+            }
+            return characters
         }
     }
 }

@@ -1,4 +1,4 @@
-package me.dion.hse.traits
+package me.dion.hse.network
 
 import android.os.Bundle
 import android.os.Handler
