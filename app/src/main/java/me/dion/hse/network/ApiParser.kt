@@ -8,41 +8,55 @@ import android.os.Message
 import com.google.gson.JsonParser
 import me.dion.hse.activity.SearchActivity
 import me.dion.hse.traits.Character
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import java.io.Serializable
 
 @SuppressLint("HandlerLeak")
 class ApiParser(val activity: Activity) {
-    var characters: MutableList<Character>? = null
+    private var characters: MutableList<Character>? = null
 
     fun getCharacters(name: String) {
-        val request = Request.Builder()
-            .url("https://rickandmortyapi.com/api/character/?name=$name")
-            .build()
+        val thread = Thread {
+            val request = Request.Builder()
+                .url("https://rickandmortyapi.com/api/character/?name=$name")
+                .build()
 
-        val handler = object : Handler() {
-            override fun handleMessage(msg: Message) {
-                val bundle = msg.data
-                val res = bundle.getSerializable("response") as ISerializable
-                val response = res.metadata as Response
-                if (response.isSuccessful) {
-                    val json = response.body.string()
-                    val jsonObj = JsonParser.parseString(json).asJsonObject
-                    val results = jsonObj.get("results").asJsonArray
-                    characters = Character.parseJsonArray(results)
-
-                    val intent = Intent(activity, SearchActivity::class.java)
-
-                    intent.putExtra("characters", characters as Serializable)
-
-                    activity.startActivity(intent)
-                }
+            val client = OkHttpClient()
+            val response = client.newCall(request).execute()
+            if (response.isSuccessful) {
+                val json = response.body.string()
+                val jsonObj = JsonParser.parseString(json).asJsonObject
+                val pages = jsonObj.get("info").asJsonObject.get("pages").asInt
+                characters = parseAllPages(name, pages)
+                val intent = Intent(activity, SearchActivity::class.java)
+                intent.putExtra("characters", characters as Serializable)
+                activity.startActivity(intent)
             }
         }
 
-        val thread = NetThread(handler, request)
         thread.start()
-        thread.join(10000)
+    }
+
+    private fun parseAllPages(name: String, pages: Int): MutableList<Character> {
+        val chars = mutableListOf<Character>()
+        for (i in 1..pages) {
+            val request = Request.Builder()
+                .url("https://rickandmortyapi.com/api/character/?page=$i&name=$name")
+                .build()
+
+            val client = OkHttpClient.Builder().build()
+            val response = client.newCall(request).execute()
+
+            if (response.isSuccessful) {
+                val json = response.body.string()
+                val jsonObj = JsonParser.parseString(json).asJsonObject
+
+                val results = jsonObj.get("results").asJsonArray
+                chars.addAll(Character.parseJsonArray(results))
+            }
+        }
+        return chars
     }
 }
