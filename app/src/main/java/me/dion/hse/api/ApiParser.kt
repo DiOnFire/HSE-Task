@@ -12,30 +12,29 @@ import okhttp3.Request
 @SuppressLint("HandlerLeak")
 class ApiParser {
     companion object {
-        fun getAllCharacters(): List<Character> {
-            return TODO("No implementation yet")
-        }
-
-        fun getPagesCount(): Int {
-            var pagesCount = 0
+        fun getCharacter(name: String): Character {
+            var character: Character? = null
 
             val request = Request.Builder()
-                .url("https://rickandmortyapi.com/api/character/")
+                .url("https://rickandmortyapi.com/api/character/?name=$name")
                 .build()
 
             val handler = object : Handler() {
                 override fun handleMessage(msg: Message) {
                     val bundle = msg.data
-                    val response = bundle.getString("response") as SerializableResponse
-                    val data = response.response.body.string()
-                    val json = JsonParser.parseString(data).asJsonObject
-                    pagesCount = json.get("info").asJsonObject.get("pages").asInt
+                    val response = bundle.getSerializable("response") as SerializableResponse
+                    if (response.response.isSuccessful) {
+                        val json = response.response.body.string()
+                        val jsonObject = JsonParser.parseString(json).asJsonObject
+                        character = Character.parseFromJson(jsonObject)
+                    }
                 }
             }
 
-            NetThread(handler, request).start()
-
-            return pagesCount
+            val thread = NetThread(handler, request)
+            thread.start()
+            thread.join()
+            return character!!
         }
     }
 }
