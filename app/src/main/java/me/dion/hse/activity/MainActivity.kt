@@ -1,11 +1,11 @@
 package me.dion.hse.activity
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import me.dion.hse.R
+import me.dion.hse.dialog.LoadingDialog
 import me.dion.hse.network.ApiParser
 
 class MainActivity : AppCompatActivity() {
@@ -20,7 +20,10 @@ class MainActivity : AppCompatActivity() {
         characterNameEdit = findViewById(R.id.char_name_edit)
 
         searchBtn.setOnClickListener {
+            val loadingDialog = LoadingDialog(this@MainActivity)
+            loadingDialog.startLoadingDialog()
             ApiParser(this).getCharacters(characterNameEdit.text.toString())
+            loadingDialog.dismissDialog()
         }
     }
 }

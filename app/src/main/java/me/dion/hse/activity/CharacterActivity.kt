@@ -9,6 +9,7 @@ import android.os.Message
 import android.widget.ImageView
 import android.widget.TextView
 import me.dion.hse.R
+import me.dion.hse.dialog.LoadingDialog
 import me.dion.hse.network.ISerializable
 import me.dion.hse.network.NetBitmap
 import me.dion.hse.traits.Character
@@ -22,10 +23,14 @@ class CharacterActivity : AppCompatActivity() {
     private lateinit var characterSpecies: TextView
     private lateinit var characterStatus: TextView
     private lateinit var characterGender: TextView
+    private lateinit var loadingDialog: LoadingDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_character)
+
+        loadingDialog = LoadingDialog(this@CharacterActivity)
+        loadingDialog.startLoadingDialog()
 
         character = intent.getSerializableExtra("character") as Character
         characterImg = findViewById(R.id.characterImg)
@@ -45,6 +50,7 @@ class CharacterActivity : AppCompatActivity() {
                 val bundle = msg.data
                 val bitmap = bundle.getSerializable("bitmap") as ISerializable
                 characterImg.setImageBitmap(bitmap.metadata as Bitmap)
+                loadingDialog.dismissDialog()
             }
         }
 
