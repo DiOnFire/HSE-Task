@@ -9,6 +9,7 @@ import com.google.gson.JsonParser
 import me.dion.hse.activity.SearchActivity
 import me.dion.hse.traits.Character
 import okhttp3.Request
+import okhttp3.Response
 import java.io.Serializable
 
 @SuppressLint("HandlerLeak")
@@ -23,9 +24,10 @@ class ApiParser(val activity: Activity) {
         val handler = object : Handler() {
             override fun handleMessage(msg: Message) {
                 val bundle = msg.data
-                val response = bundle.getSerializable("response") as SerializableResponse
-                if (response.response.isSuccessful) {
-                    val json = response.response.body.string()
+                val res = bundle.getSerializable("response") as ISerializable
+                val response = res.metadata as Response
+                if (response.isSuccessful) {
+                    val json = response.body.string()
                     val jsonObj = JsonParser.parseString(json).asJsonObject
                     val results = jsonObj.get("results").asJsonArray
                     characters = Character.parseJsonArray(results)

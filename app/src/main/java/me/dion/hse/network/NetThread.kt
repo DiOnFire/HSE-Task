@@ -14,7 +14,7 @@ class NetThread(
     override fun run() {
         val client = OkHttpClient.Builder().build()
         val bundle = Bundle()
-        bundle.putSerializable("response", SerializableResponse(client.newCall(request).execute()))
+        bundle.putSerializable("response", ISerializable(client.newCall(request).execute()))
         val message = Message()
         message.data = bundle
         handler.sendMessage(message)

@@ -1,14 +1,19 @@
 package me.dion.hse.activity
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Message
 import android.widget.ImageView
 import android.widget.TextView
 import me.dion.hse.R
+import me.dion.hse.network.ISerializable
 import me.dion.hse.network.NetBitmap
 import me.dion.hse.traits.Character
 
+@SuppressLint("HandlerLeak")
 class CharacterActivity : AppCompatActivity() {
     private lateinit var character: Character
     private lateinit var characterImg: ImageView
@@ -35,7 +40,15 @@ class CharacterActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun applyMetadata() {
-        val thread = NetBitmap(character.image, characterImg)
+        val handler = object : Handler() {
+            override fun handleMessage(msg: Message) {
+                val bundle = msg.data
+                val bitmap = bundle.getSerializable("bitmap") as ISerializable
+                characterImg.setImageBitmap(bitmap.metadata as Bitmap)
+            }
+        }
+
+        val thread = NetBitmap(character.image, handler)
         thread.start()
         characterName.text = "Name: ${character.name}"
         characterId.text = "UUID: ${character.id}"
